@@ -1,6 +1,7 @@
-if(!(Get-Module Microsoft.PowerShell.SecretManagement)) {
-    Install-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore
+if(!(Get-Module Microsoft.PowerShell.SecretManagement -ListAvailable)) {
+    Install-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore -Force
 }
+Import-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore
 # Read or create a netbox config object
 try {
     $config=Import-Clixml $PSScriptRoot\config.xml
