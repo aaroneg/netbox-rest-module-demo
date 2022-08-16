@@ -1,0 +1,7 @@
+name,status,region,sitegroup,facility,timezone,description
+"Global HQ","active","United Mexican States","Global Headquarters","None","America/Mexico City","Main Executive Offices"
+"Global Logistics","active","Republic of Honduras","Global Headquarters","None","America/Chicago","Main Logistical Offices"
+"North American HQ","active","Canada","Regional Headquarters","None","America/Chicago","Main Logistical Offices"
+"TUL01","active","United States of America","Sales","None","America/Chicago","Tulsa Sales Office"
+"TUL02","active","United States of America","Warehouse","None","America/Chicago","Tulsa Warehouse"
+"DTUL1","active","United States of America","Datacenter","BigHostingCompany 07Y","America/Chicago","Tulsa Datacenter"
