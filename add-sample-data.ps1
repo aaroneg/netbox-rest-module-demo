@@ -123,6 +123,6 @@ function add-manufacturers {
 function add-platforms {
     New-NBDevicePlatform -name "Linux"
     $obj = New-NBDevicePlatform -name "Windows"
-    Set-NBDevicePlatform -id $obj.id -key 
+    Set-NBDevicePlatform -id $obj.id -key manufacturer -value (Find-NBManufacturersByName -name "microsoft")[0].id
 
 }
