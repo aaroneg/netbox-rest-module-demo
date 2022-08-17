@@ -1,0 +1,9 @@
+manufacturer,model,u_height,is_full_depth,comments,subdevice_role
+"Dell","CX950",4,true,"Large fake server for storage",
+"Dell","CX150",1,true,"Small fake server for compute",
+"Dell","CX150",1,true,"Small fake server for compute",
+"Dell","ZX100",12,true,"Fake Blade Chassis","parent"
+"Dell","ZX150",0,true,"Fake Blade Server","child"
+"CheapNetworks","QQ-7550",1,true,"Fake Router",
+"CheapNetworks","RA-65-32q",1,true,"Fake Switch",
+
