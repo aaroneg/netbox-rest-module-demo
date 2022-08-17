@@ -61,11 +61,11 @@ function add-sites {
 
 function add-locations {
     foreach ($location in $Locations) {
-        $obj = New-NBLocation -name $location.name -siteID (Find-NBSitesByName -name $location.site)[0].id
-        Set-NBLocation -id $obj.id -key tenant -value (Find-NBTenantsByName -name $location.tenant)[0].id
+        $obj = New-NBLocation -name $location.name -siteID (Find-NBSitesContainingName -name $location.site)[0].id
+        Set-NBLocation -id $obj.id -key tenant -value (Find-NBTenantsContainingName -name $location.tenant)[0].id
         Set-NBLocation -id $obj.id -key description -value $location.description
         if ($location.parent.length -gt 1) {
-            Set-NBLocation -id $obj.id -key parent -value (Find-NBLocationsByName -name $location.parent)[0].id
+            Set-NBLocation -id $obj.id -key parent -value (Find-NBLocationsContainingName -name $location.parent)[0].id
         }
         #Read-Host -Prompt "Press enter to proceed"
     }
@@ -79,9 +79,9 @@ function add-rackroles {
 
 function add-racks {
     $Racks | ForEach-Object {
-        $obj = New-NBRack -name $_.name -siteID (Find-NBSitesByName -name $_.site)[0].id -locationID (Find-NBLocationsByName -name $_.location)[0].id -Verbose
-        Set-NBRack -id $obj.id -key role -value (Find-NBRackRolesByName -name $_.role)[0].id
-        Set-NBRack -id $obj.id -key tenant -value(Find-NBTenantsByName -name $_.tenant)[0].id        
+        $obj = New-NBRack -name $_.name -siteID (Find-NBSitesContainingName -name $_.site)[0].id -locationID (Find-NBLocationsContainingName -name $_.location)[0].id -Verbose
+        Set-NBRack -id $obj.id -key role -value (Find-NBRackRolesContainingName -name $_.role)[0].id
+        Set-NBRack -id $obj.id -key tenant -value(Find-NBTenantsContainingName -name $_.tenant)[0].id        
     }
 }
 
@@ -98,7 +98,7 @@ function add-contacts {
         Set-NBContact -id $obj.id -key email -value $_.email -Verbose
         Set-NBContact -id $obj.id -key address -value $_.address -Verbose
         Set-NBContact -id $obj.id -key link -value $_.link -Verbose
-        Set-NBContact -id $obj.id -key group -value (Find-NBContactGroupsByName -name  $_.group)[0].id -Verbose
+        Set-NBContact -id $obj.id -key group -value (Find-NBContactGroupsContainingName -name  $_.group)[0].id -Verbose
     }
 }
 
@@ -123,6 +123,10 @@ function add-manufacturers {
 function add-platforms {
     New-NBDevicePlatform -name "Linux"
     $obj = New-NBDevicePlatform -name "Windows"
-    Set-NBDevicePlatform -id $obj.id -key manufacturer -value (Find-NBManufacturersByName -name "microsoft")[0].id
+    Set-NBDevicePlatform -id $obj.id -key manufacturer -value (Find-NBManufacturersContainingName -name "microsoft")[0].id
+
+}
+
+function add-devices {
 
 }
