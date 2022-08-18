@@ -7,6 +7,7 @@ $RackRoles=Import-csv -Path $PSScriptRoot\sample-data\rack-roles.csv
 $Racks=Import-csv -Path $PSScriptRoot\sample-data\racks.csv
 $Contacts=Import-Csv -Path $PSScriptRoot\sample-data\contacts.csv
 $DeviceTypes=Import-Csv -Path $PSScriptRoot\sample-data\device-types.csv
+$Devices=Import-Csv -Path $PSScriptRoot\sample-data\devices.csv
 
 
 . $PSScriptRoot\init.ps1
@@ -121,9 +122,9 @@ function add-manufacturers {
 
 function add-platforms {
     New-NBDevicePlatform -name "Linux"
-    $obj = New-NBDevicePlatform -name "Windows"
-    Set-NBDevicePlatform -id $obj.id -key manufacturer -value (Get-NBManufacturerByName -name "microsoft").id
-
+    New-NBDevicePlatform -name "Windows"
+    #$obj = New-NBDevicePlatform -name "Windows"
+    #Set-NBDevicePlatform -id $obj.id -key manufacturer -value (Get-NBManufacturerByName -name "microsoft").id
 }
 
 function add-devicetypes {
@@ -139,5 +140,59 @@ function add-devicetypes {
 }
 
 function add-devices {
+    $Devices | ForEach-Object {
+        $obj = New-NBDevice -name $_.name -device_typeID (Get-NBDeviceTypeByModel -model $_.model).id -device_roleID (Get-NBDeviceRoleByName $_.role).id -siteID (Get-NBSiteByName $_.site).id #-face $_.face -Verbose
+        Set-NBDevice -id $obj.id -key tenant -value (Get-NBTenantByName -name $_.tenant).id
+        if ($_.platform.length -gt 1) {Set-NBDevice -id $obj.id -key platform -value (Get-NBDevicePlatformByName -name $_.platform).id;(Get-NBDevicePlatformByName -name $_.platform).id}
+    }
+}
 
+function add-vrfs {
+    New-NBVRF -name "Tailwind Toys"
+    New-NBVRF -name "Contoso Limited"
+}
+
+function add-vlangroups {
+    New-NBVlanGroup -name "Tailwind Toys"
+    New-NBVlanGroup -name "Contoso Limited"
+}
+function add-vlans {
+    New-NBVLAN -name 'clients' -vid 2 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'servers' -vid 3 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 4 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 5 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
+}
+
+function add-prefixes {
+    $obj = New-NBPrefix -prefix "192.168.0.0/24"
+    Set-NBPrefix -id $obj.id -key vrf -value (Get-NBVRFByName "Tailwind Toys").id
+    Set-NBPrefix -id $obj.id -key tenant -value (Get-NBVRFByName "Tailwind Toys").id
+    Set-NBPrefix -id $obj.id -key vlan -value 3
+    $obj = New-NBPrefix -prefix "192.168.0.0/24"
+    Set-NBPrefix -id $obj.id -key vrf -value (Get-NBVRFByName "Contoso Limited").id
+    Set-NBPrefix -id $obj.id -key tenant -value (Get-NBVRFByName "Contoso Limited").id
+    Set-NBPrefix -id $obj.id -key vlan -value 2
+    $obj = New-NBPrefix -prefix "192.168.1.0/24"
+    Set-NBPrefix -id $obj.id -key vrf -value (Get-NBVRFByName "Tailwind Toys").id
+    Set-NBPrefix -id $obj.id -key tenant -value (Get-NBVRFByName "Tailwind Toys").id
+    Set-NBPrefix -id $obj.id -key vlan -value 5
+    $obj = New-NBPrefix -prefix "192.168.1.0/24"
+    Set-NBPrefix -id $obj.id -key vrf -value (Get-NBVRFByName "Contoso Limited").id
+    Set-NBPrefix -id $obj.id -key tenant -value (Get-NBVRFByName "Contoso Limited").id
+    Set-NBPrefix -id $obj.id -key vlan -value 4
+}
+
+function add-ipranges {
+    $obj = New-NBIPRange -startAddress "192.168.0.100/24" -endAddress "192.168.0.149/24" -status 'active'
+    Set-NBIPRange -id $obj.id -key vrf -value (Get-NBVRFByName "Tailwind Toys").id
+    Set-NBIPRange -id $obj.id -key tenant -value (Get-NBTenantByName "Tailwind Toys").id
+    $obj = New-NBIPRange -startAddress "192.168.0.100/24" -endAddress "192.168.0.149/24" -status 'active'
+    Set-NBIPRange -id $obj.id -key vrf -value (Get-NBVRFByName "Contoso Limited").id
+    Set-NBIPRange -id $obj.id -key tenant -value (Get-NBTenantByName "Tailwind Toys").id
+}
+
+function add-ipaddresses {
+    $Devices | ForEach-Object {
+        $obj = 
+    }
 }
