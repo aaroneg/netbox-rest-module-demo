@@ -1,0 +1,10 @@
+name,site,location,role,tenant
+"TULWH1MDF001_r1","DTUL1","TULWH1MDF001","Compute","Tailwind Toys"
+"TULWH1MDF001_r2","DTUL1","TULWH1MDF001","Compute","Contoso Limited"
+"TULWH1MDF001_r3","DTUL1","TULWH1MDF001","Compute","Contoso Limited"
+"TULWH1MDF001_r4","DTUL1","TULWH1MDF001","Compute","Contoso Limited"
+"TULWH1MDF001_r5","DTUL1","TULWH1MDF001","Mixed Use","Contoso Limited"
+"TULWH1MDF001_r6","DTUL1","TULWH1MDF001","Power","Contoso Limited"
+"TULWH1IDF007_p1","DTUL1","TULWH1IDF007","Network","Contoso Limited"
+"TULWH1IDF007_p2","DTUL1","TULWH1IDF007","Network","Expensive Cable"
+"TULWH1IDF007_p3","DTUL1","TULWH1IDF007","Network","Horizon"

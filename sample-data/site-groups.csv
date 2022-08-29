@@ -1,0 +1,7 @@
+name,description,parent
+"Global Headquarters","An office responsible for overseeing global activities in some area"
+"Regional Headquarters","A regional office responsible for overseeing activities in a region"
+"Branch Office","A local office"
+"Sales","A branch office that conducts commercial activities directly with customers","Branch Office"
+"Warehouse","A branch office that stores raw materials, products, or supplies","Branch Office"
+"Datacenter","Locations containing a Datacenter"
