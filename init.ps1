@@ -19,7 +19,7 @@ try {
     $Secret=Get-Secret -Name $Config.serverAddress -AsPlainText -ErrorAction Stop
 }
 catch {
-    $Secret=Read-Host -Message "API Key"
+    $Secret=Read-Host -Prompt "API Key"
     Set-Secret -Name $config.serverAddress -Secret $Secret
 }
 
