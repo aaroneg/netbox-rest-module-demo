@@ -64,7 +64,7 @@ function add-locations {
     }
     foreach ($location in $Locations){
         if ($location.parent) {
-            Set-NBLocation -id (Get-NBLocationByName -name $location.name) -key parent -value (Get-NBLocationByName -name $location.parent).id
+            Set-NBLocation -id (Get-NBLocationByName -name $location.name).id -key parent -value (Get-NBLocationByName -name $location.parent).id
         }
     }
 }
@@ -144,6 +144,7 @@ function add-devices {
         $obj = New-NBDevice -name $_.name -device_typeID (Get-NBDeviceTypeByModel -model $_.model).id -device_roleID (Get-NBDeviceRoleByName $_.role).id -siteID (Get-NBSiteByName $_.site).id #-face $_.face -Verbose
         Set-NBDevice -id $obj.id -key tenant -value (Get-NBTenantByName -name $_.tenant).id
         if ($_.platform.length -gt 1) {Set-NBDevice -id $obj.id -key platform -value (Get-NBDevicePlatformByName -name $_.platform).id;(Get-NBDevicePlatformByName -name $_.platform).id}
+
     }
 }
 
@@ -191,8 +192,27 @@ function add-ipranges {
     Set-NBIPRange -id $obj.id -key tenant -value (Get-NBTenantByName "Tailwind Toys").id
 }
 
-function add-ipaddresses {
-    $Devices | ForEach-Object {
-        $obj = 
+ function add-ipaddresses {
+     $Devices | ForEach-Object {
+        $_
+        $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id
+        #$_.id = (Get-nbdevicebyname $_.Name).id
+        $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -deviceID (get-nbdevicebyid $_.id).id -Verbose
+        $intObj
+         $ipv4Obj = New-NBIPAddress -address $_.ipv4
+         Set-NBIPAddressParent -id $ipv4Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface -Verbose
+         Set-NBIPAddress -id $ipv4Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id
+         $ipv6Obj = New-NBIPAddress -address $_.ipv6
+         Set-NBIPAddressParent -id $ipv6Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface -Verbose
+         Set-NBIPAddress -id $ipv6Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id
+        # throw "stop"
+     }
+ }
+
+ function reset-ipaddresses {
+    $IPAddresses=Get-NBIPAddresses
+    $IPAddresses|ForEach-Object {
+        Remove-NBIPAddress -id $_.id
     }
-}
+    Get-NBDeviceInterfaces | % { Remove-NBDeviceInterface -id $_.id }
+ }

@@ -1,13 +1,12 @@
 name,model,role,face,tenant,platform,site,ipv4,ipv6
-TULWH1SR011,CX950,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.5/24","2001:0DB8:1::5/64
-TULWH1SR071,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.5/24","2001:0DB8:2::5/64
-TULWH1SR177,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.6/24","2001:0DB8:2::5/64
-TULWH1SR871,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.7/24","2001:0DB8:2::5/64
-ZX100,server,front,"Contoso Limited",,TUL01,
-TULWH1SR001,ZX150,server,front,"Contoso Limited",Linux,TUL01,"192.168.0.6/24","2001:0DB8:1::6/64
-TULWH1SR002,ZX150,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.7/24","2001:0DB8:1::7/64
-TULWH1SR003,ZX150,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.8/24","2001:0DB8:1::8/64
-TULWH1SB004,ZX150,server,front,"Tailwind Toys",Windows,TUL01,"192.168.0.8/24","2001:0DB8:2::8/64
-XAC01BA,QQ-7550,switch,front,"Horizon",Linux,TUL01,"10.124.76.74/24","2001:0DB8:a::5/64
-TULWH1SW004,RA-65-32q,switch,rear,"Contoso Limited",Linux,TUL01,"192.168.0.9/24","2001:0DB8:1::9/64
-TULWH1SW002,RA-65-32q,switch,rear,"Tailwind Toys",Linux,TUL01,"192.168.0.9/24","2001:0DB8:2::9/64
+TULWH1SR011,CX950,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.5/24","2001:0DB8:1::5/64"
+TULWH1SR071,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.5/24","2001:0DB8:2::5/64"
+TULWH1SR177,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.6/24","2001:0DB8:2::6/64"
+TULWH1SR871,CX150,server,front,"Tailwind Toys",Linux,TUL01,"192.168.0.7/24","2001:0DB8:2::7/64"
+TULWH1SR001,ZX150,server,front,"Contoso Limited",Linux,TUL01,"192.168.0.6/24","2001:0DB8:1::6/64"
+TULWH1SR002,ZX150,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.7/24","2001:0DB8:1::7/64"
+TULWH1SR003,ZX150,server,front,"Contoso Limited",Windows,TUL01,"192.168.0.8/24","2001:0DB8:1::8/64"
+TULWH1SB004,ZX150,server,front,"Tailwind Toys",Windows,TUL01,"192.168.0.8/24","2001:0DB8:2::8/64"
+XAC01BA,QQ-7550,switch,front,"Horizon",Linux,TUL01,"10.124.76.74/24","2001:0DB8:a::5/64"
+TULWH1SW004,RA-65-32q,switch,rear,"Contoso Limited",Linux,TUL01,"192.168.0.9/24","2001:0DB8:1::9/64"
+TULWH1SW002,RA-65-32q,switch,rear,"Tailwind Toys",Linux,TUL01,"192.168.0.9/24","2001:0DB8:2::9/64"
