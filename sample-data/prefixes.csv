@@ -1,0 +1,10 @@
+prefix,tenant,vlan,is_aggregate
+2001:db8:0::/48,"Contoso Limited",,true
+2001:db8:1::/48,"Tailwind Toys",,true
+192.168.0.0/16,"Contoso Limited",,true
+192.168.0.0/24,"Contoso Limited",2,false
+192.168.0.0/24,"Tailwind Toys",3,false
+192.168.1.0/24,"Contoso Limited",4,false
+192.168.1.0/24,"Tailwind Toys",5,false
+"2001:0DB8::/64","Tailwind Toys",3,false
+"2001:0DB8:1::/64","Contoso Limited",3,false

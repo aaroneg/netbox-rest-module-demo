@@ -1,0 +1,3 @@
+ssid,vlan,tenant,description
+tailwind-clients,4,"Tailwind Toys","Clients"
+contoso-clients,5,"Contoso Limited","Clients"
