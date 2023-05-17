@@ -1,7 +1,7 @@
 $Tenants=Import-Csv -Path $PSScriptRoot\sample-data\tenants.csv
 $Regions=Import-Csv -Path $PSScriptRoot\sample-data\regions.csv
 $SiteGroups=Import-Csv -Path $PSScriptRoot\sample-data\site-groups.csv
-$Sites=Import-Csv -Path $PSScriptRoot\sample-data\Sites.csv
+$Sites=Import-Csv -Path $PSScriptRoot\sample-data\sites.csv
 $Locations=Import-Csv -Path $PSScriptRoot\sample-data\locations.csv
 $RackRoles=Import-csv -Path $PSScriptRoot\sample-data\rack-roles.csv
 $Racks=Import-csv -Path $PSScriptRoot\sample-data\racks.csv
@@ -12,14 +12,14 @@ $Devices=Import-Csv -Path $PSScriptRoot\sample-data\devices.csv
 
 . $PSScriptRoot\init.ps1
 function add-Tenants {
-    Write-Warning "[$($MyInvocation.MyCommand.Name)]"
+    Write-Verbose "[$($MyInvocation.MyCommand.Name)]"
     $groups=$Tenants | Select-Object -Unique -ExpandProperty group
     foreach ($item in $groups) {
-        New-NBTenantGroup -name $item 
+        $obj = New-NBTenantGroup -name $item 
     }
     foreach ($Tenant in $Tenants) {
         $obj = New-NBTenant -name $Tenant.name
-        Set-NBTenant -id $obj.id -key group -value (Get-NBTenantGroupByName $Tenant.group).id 
+        $obj = Set-NBTenant -id $obj.id -key group -value (Get-NBTenantGroupByName $Tenant.group).id
     }
 }
 
@@ -209,36 +209,50 @@ function add-vmclusterinformation {
     New-NBVMClusterType -name 'kvm' 
     New-NBVMClusterType -name 'xen' 
     New-NBVMClusterType -name 'lxc' 
-    $Cluster=New-NBVMCluster -name "DTUL1ESX01" -typeID (Get-NBVMClusterTypeByName 'vmware').id
+    $Cluster=New-NBVMCluster -name "DTUL1ESX01" -type (Get-NBVMClusterTypeByName 'vmware').id
     $Cluster
  }
 
 $vms = Import-Csv $PSScriptRoot\sample-data\virtual-machines.csv
  function add-vmstocluster ($clusterID) {
-    Write-Warning "[$($MyInvocation.MyCommand.Name)]"
+    Write-Verbose "[$($MyInvocation.MyCommand.Name)]"
     $vms| % {
         $clusterID
-        $vm = New-NBVM -name $_.name -clusterID (Get-NBVMClusterByName 'DTUL1ESX01').id
+        $vm = New-NBVM -name $_.name -cluster (Get-NBVMClusterByName 'DTUL1ESX01').id
         $vm
-        $int = New-NBVMInterface -VMID $vm.id -name 'eth0'
+        $int = New-NBVMInterface -virtual_machine $vm.id -name 'eth0'
         $ipv4= New-NBIPAddress -address $_.ipv4
+        Set-NBIPAddress -id $ipv4.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
         $ipv6= New-NBIPAddress -address $_.ipv6
-        Set-NBIPAddressParent -id $ipv4.id -InterFaceType virtualization.vminterface -interfaceID $int.id
-        Set-NBIPAddressParent -id $ipv6.id -InterFaceType virtualization.vminterface -interfaceID $int.id
+        Set-NBIPAddress -id $ipv6.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+        Set-NBIPAddressParent -id $ipv4.id -InterFaceType virtualization.vminterface -interface $int.id
+        Set-NBIPAddressParent -id $ipv6.id -InterFaceType virtualization.vminterface -interface $int.id
     }
  }
 
  function add-ipaddresses {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
      $Devices | ForEach-Object {
+        Write-Verbose $_.Name
+        Write-Verbose "Adding ID"
         $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id
+        Write-Verbose $_.id
+        Write-Verbose "Creating interface device"
         $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -deviceID (get-nbdevicebyid $_.id).id
+        Write-Verbose $intObj.name
+        Write-Verbose "Creating interface IPv4 $($_.ipv4)"
         $ipv4Obj = New-NBIPAddress -address $_.ipv4
-        Set-NBIPAddressParent -id $ipv4Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface 
-        Set-NBIPAddress -id $ipv4Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+        Write-Verbose $ipv4Obj.id
+        Write-Verbose "Setting IP Address to parent"
+        Set-NBIPAddressParent -id $ipv4Obj.id -interface $intObj.id -InterFaceType dcim.interface 
+        Get-NBDeviceInterfaceByID $intObj.id
         $ipv6Obj = New-NBIPAddress -address $_.ipv6
-        Set-NBIPAddressParent -id $ipv6Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface 
-        Set-NBIPAddress -id $ipv6Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+        Set-NBIPAddressParent -id $ipv6Obj.id -interface $intObj.id -InterFaceType dcim.interface 
+        try {
+            Set-NBIPAddress -id $ipv4Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+            Set-NBIPAddress -id $ipv6Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+        }
+        catch {}
      }
  }
 
