@@ -173,10 +173,10 @@ function add-vlangroups {
 }
 function add-vlans {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBVLAN -name 'clients' -vid 2 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'servers' -vid 3 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'clients' -vid 4 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'clients' -vid 5 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 2 -status active -tenant (Get-NBTenantByName "Tailwind Toys").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'servers' -vid 3 -status active -tenant (Get-NBTenantByName "Tailwind Toys").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 4 -status active -tenant (Get-NBTenantByName "Contoso Limited").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 5 -status active -tenant (Get-NBTenantByName "Contoso Limited").id -site (Get-NBSiteByName "DTUL1").id
 }
 
 $Prefixes=Import-csv $PSScriptRoot\sample-data\prefixes.csv
