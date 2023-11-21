@@ -1,5 +1,6 @@
 if(!(Get-Module Microsoft.PowerShell.SecretManagement -ListAvailable)) {
     Install-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore -Force
+    Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
 }
 Import-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore
 # Read or create a netbox config object

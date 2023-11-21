@@ -1,3 +1,3 @@
 name,role,tenant,platform,site,ipv4,ipv6
-dtul1adc1,server,"Tailwind Toys",Windows,DTUL1,192.168.0.9/24,"2001:0DB8::9/64"
-dtul1adc2,server,"Contoso Limited",Windows,DTUL1,192.168.0.9/24,"2001:0DB8:1::9/64"
+dtul1adc1,server,"Tailwind Toys",Windows,DTUL1,192.168.0.254/24,"2001:0DB8::9/64"
+dtul1adc2,server,"Contoso Limited",Windows,DTUL1,192.168.0.254/24,"2001:0DB8:1::9/64"
