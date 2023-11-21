@@ -15,19 +15,19 @@ function add-Tenants {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $groups=$Tenants | Select-Object -Unique -ExpandProperty group
     foreach ($item in $groups) {
-        New-NBTenantGroup -name $item 
+        New-NBTenantGroup -name $item | Out-Null
     }
     foreach ($Tenant in $Tenants) {
-        $obj = New-NBTenant -name $Tenant.name
-        Set-NBTenant -id $obj.id -key group -value (Get-NBTenantGroupByName $Tenant.group).id 
+        New-NBTenant -name $Tenant.name -group (Get-NBTenantGroupByName $Tenant.group).id | Out-Null
     }
 }
 
 function add-regions {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $Regions| ForEach-Object {
-        New-NBRegion -name $_.name 
+        New-NBRegion -name $_.name | Out-Null
     }
+    # Double-running this loop to make sure all items exist before setting parent objects
     $Regions| ForEach-Object {
         if($_.parent) {
             Set-NBRegion -id (Get-NBRegionByName -name $_.name).id -key parent -value (Get-NBRegionByName -name $_.parent).id 
@@ -38,9 +38,9 @@ function add-regions {
 function add-siteGroups {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $SiteGroups | ForEach-Object {
-        $obj = New-NBSiteGroup -name $_.name
-        Set-NBSiteGroup -id $obj.id -key description -value $_.description 
+        New-NBSiteGroup -name $_.name | Out-Null
     }
+    # Double-running this loop to make sure all items exist before setting parent objects
     $SiteGroups | ForEach-Object {
         if ($_.parent) {
             Set-NBSiteGroup -id (Get-NBSiteGroupByName $_.name).id -key parent -value (Get-NBSiteGroupByName -name $_.parent).id 
@@ -51,42 +51,56 @@ function add-siteGroups {
 function add-sites {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     foreach ($site in $Sites) {
-        $obj = New-NBSite -name $site.name -status $site.status
-        Set-NBSite -id $obj.id -key region -value (Get-NBRegionByName $site.region).id 
-        Set-NBSite -id $obj.id -key group -value (Get-NBSiteGroupByName $site.sitegroup).id 
-        Set-NBSite -id $obj.id -key facility -value $site.facility 
-        Set-NBSite -id $obj.id -key time_zone -value $site.timezone 
-        Set-NBSite -id $obj.id -key description -value $site.description 
+        $objParams = @{
+            name           = $site.name
+            status         = $site.status
+            region         = (Get-NBRegionByName $site.region).id
+            group          = (Get-NBSiteGroupByName $site.sitegroup).id
+            facility       = $site.facility 
+            time_zone      = $site.timezone 
+            description    = $site.description 
+
+        }
+        $obj = New-NBSite @objParams | Out-Null
     }
 }
 
 function add-locations {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     foreach ($location in $Locations) {
-        $obj = New-NBLocation -name $location.name -siteID (Get-NBSiteByName -name $location.site).id 
-        Set-NBLocation -id $obj.id -key tenant -value (Get-NBTenantByName -name $location.tenant).id 
-        Set-NBLocation -id $obj.id -key description -value $location.description 
+        $objParams = @{
+            name        = $location.name
+            site        = (Get-NBSiteByName -name $location.site).id
+            tenant      = (Get-NBTenantByName -name $location.tenant).id 
+            description = $location.description 
+        }
+        $obj = New-NBLocation @objParams
     }
+    # Double-running this loop to make sure all items exist before setting parent objects
     foreach ($location in $Locations){
         if ($location.parent) {
-            Set-NBLocation -id (Get-NBLocationByName -name $location.name).id -key parent -value (Get-NBLocationByName -name $location.parent).id  
+            Set-NBLocation -id (Get-NBLocationByName -name $location.name).id -key parent -value (Get-NBLocationByName -name $location.parent).id | Out-Null
         }
     }
 }
 function add-rackroles {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $RackRoles | ForEach-Object {
-        $obj = New-NBRackRole -name $_.Name
-        Set-NBRackRole -id $obj.id -key color -value $_.color 
+        $obj = New-NBRackRole -name $_.Name -color $_.color
     }
 }
 
 function add-racks {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $Racks | ForEach-Object {
-        $obj = New-NBRack -name $_.name -siteID (Get-NBSiteByName -name $_.site).id -locationID (Get-NBLocationByName -name $_.location).id
-        Set-NBRack -id $obj.id -key role -value (Get-NBRackRoleByName -name $_.role).id
-        Set-NBRack -id $obj.id -key tenant -value(Get-NBTenantByName -name $_.tenant).id        
+        $objParams=@{
+            name     = $_.name
+            site     = (Get-NBSiteByName -name $_.site).id
+            location = (Get-NBLocationByName -name $_.location).id
+            role     = (Get-NBRackRoleByName -name $_.role).id
+            tenant   = (Get-NBTenantByName -name $_.tenant).id
+        }
+        $obj = New-NBRack @objParams
     }
 }
 
@@ -94,56 +108,64 @@ function add-contacts {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $ContactGroups = $Contacts | Select-Object -ExpandProperty group -Unique
     foreach ($item in $ContactGroups) {
-        New-NBContactGroup -name $item
+        New-NBContactGroup -name $item | Out-Null
     }
     $Contacts | ForEach-Object {
-        $_.name
-        $obj = New-NBContact -name $_.name
-        Set-NBContact -id $obj.id -key title -value $_.title
-        Set-NBContact -id $obj.id -key phone -value $_.phone
-        Set-NBContact -id $obj.id -key email -value $_.email
-        Set-NBContact -id $obj.id -key address -value $_.address
-        Set-NBContact -id $obj.id -key link -value $_.link
-        Set-NBContact -id $obj.id -key group -value (Get-NBContactGroupByName -name  $_.group).id
+        $objParams= @{
+            name    = $_.name
+            title   = $_.title
+            phone   = $_.phone
+            email   = $_.email
+            address = $_.address
+            link    = $_.link
+            group   = (Get-NBContactGroupByName -name  $_.group).id
+        }
+        $obj = New-NBContact @objParams
     }
 }
 
 function add-contactroles {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBContactRole -name "Technician"
+    New-NBContactRole -name "Technician" | Out-Null
 }
 
 function add-deviceroles {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBDeviceRole -name "server" -color "2568da"
-    New-NBDeviceRole -name "switch" -color "65d60e"
-    New-NBDeviceRole -name "power" -color "efe410"
+    New-NBDeviceRole -name "server" -color "2568da" | Out-Null
+    New-NBDeviceRole -name "switch" -color "65d60e" | Out-Null
+    New-NBDeviceRole -name "power" -color "efe410"  | Out-Null
 }
 
 function add-manufacturers {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBManufacturer -name "Microsoft"
-    New-NBManufacturer -name "Apple"
-    New-NBManufacturer -name "Cisco"
-    New-NBManufacturer -name "Ruckus"
-    New-NBManufacturer -name "Juniper"
-    New-NBManufacturer -name "Dell"
-    New-NBManufacturer -name "CheapNetworks"
+    New-NBManufacturer -name "Microsoft"     | Out-Null
+    New-NBManufacturer -name "Apple"         | Out-Null
+    New-NBManufacturer -name "Cisco"         | Out-Null
+    New-NBManufacturer -name "Ruckus"        | Out-Null
+    New-NBManufacturer -name "Juniper"       | Out-Null
+    New-NBManufacturer -name "Dell"          | Out-Null
+    New-NBManufacturer -name "CheapNetworks" | Out-Null
 }
 
 function add-platforms {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBDevicePlatform -name "Linux"
-    New-NBDevicePlatform -name "Windows"
+    New-NBDevicePlatform -name "Linux"   | Out-Null
+    New-NBDevicePlatform -name "Windows" | Out-Null
 }
 
 function add-devicetypes {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $DeviceTypes|ForEach-Object {
-        $obj=New-NBDeviceType -manufacturerID (Get-NBManufacturerByName $_.manufacturer).id -model $_.model
-        Set-NBDeviceType -id $obj.id -key u_height -value $_.u_height
-        Set-NBDeviceType -id $obj.id -key is_full_depth -value $_.is_full_depth
-        Set-NBDeviceType -id $obj.id -key comments -value $_.comments
+        if ($_.is_full_depth -eq 'true') {$_.is_full_depth= $true}
+        else {$_.is_full_depth= $false}
+        $objParams = @{
+            manufacturer  = (Get-NBManufacturerByName $_.manufacturer).id
+            model         = $_.model
+            u_height      = $_.u_height
+            is_full_depth = $_.is_full_depth
+            comments      = $_.comments
+        }
+        $obj=New-NBDeviceType @objParams
         if ($_.subdevice_role) {
             Set-NBDeviceType -id $obj.id -key subdevice_role -value $_.subdevice_role
         }
@@ -153,8 +175,7 @@ function add-devicetypes {
 function add-devices {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $Devices | ForEach-Object {
-        $obj = New-NBDevice -name $_.name -device_typeID (Get-NBDeviceTypeByModel -model $_.model).id -device_roleID (Get-NBDeviceRoleByName $_.role).id -siteID (Get-NBSiteByName $_.site).id #-face $_.face -Verbose
-        Set-NBDevice -id $obj.id -key tenant -value (Get-NBTenantByName -name $_.tenant).id
+        $obj = New-NBDevice -name $_.name -device_type (Get-NBDeviceTypeByModel -model $_.model).id -role (Get-NBDeviceRoleByName $_.role).id -site (Get-NBSiteByName $_.site).id -tenant (Get-NBTenantByName -name $_.tenant).id
         if ($_.platform.length -gt 1) {Set-NBDevice -id $obj.id -key platform -value (Get-NBDevicePlatformByName -name $_.platform).id;(Get-NBDevicePlatformByName -name $_.platform).id}
 
     }
@@ -173,10 +194,10 @@ function add-vlangroups {
 }
 function add-vlans {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    New-NBVLAN -name 'clients' -vid 2 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'servers' -vid 3 -status active -tenantID (Get-NBTenantByName "Tailwind Toys").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'clients' -vid 4 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
-    New-NBVLAN -name 'clients' -vid 5 -status active -tenantID (Get-NBTenantByName "Contoso Limited").id -siteID (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 2 -status active -tenant (Get-NBTenantByName "Tailwind Toys").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'servers' -vid 3 -status active -tenant (Get-NBTenantByName "Tailwind Toys").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 4 -status active -tenant (Get-NBTenantByName "Contoso Limited").id -site (Get-NBSiteByName "DTUL1").id
+    New-NBVLAN -name 'clients' -vid 5 -status active -tenant (Get-NBTenantByName "Contoso Limited").id -site (Get-NBSiteByName "DTUL1").id
 }
 
 $Prefixes=Import-csv $PSScriptRoot\sample-data\prefixes.csv
@@ -193,10 +214,10 @@ function add-prefixes {
 
 function add-ipranges {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
-    $obj = New-NBIPRange -startAddress "192.168.0.100/24" -endAddress "192.168.0.149/24" -status 'active'
+    $obj = New-NBIPRange -start_address "192.168.0.100/24" -end_address "192.168.0.149/24" -status 'active'
     Set-NBIPRange -id $obj.id -key vrf -value (Get-NBVRFByName "Tailwind Toys").id
     Set-NBIPRange -id $obj.id -key tenant -value (Get-NBTenantByName "Tailwind Toys").id
-    $obj = New-NBIPRange -startAddress "192.168.0.100/24" -endAddress "192.168.0.149/24" -status 'active'
+    $obj = New-NBIPRange -start_address "192.168.0.100/24" -end_address "192.168.0.149/24" -status 'active'
     Set-NBIPRange -id $obj.id -key vrf -value (Get-NBVRFByName "Contoso Limited").id
     Set-NBIPRange -id $obj.id -key tenant -value (Get-NBTenantByName "Tailwind Toys").id
 }
@@ -209,7 +230,7 @@ function add-vmclusterinformation {
     New-NBVMClusterType -name 'kvm' 
     New-NBVMClusterType -name 'xen' 
     New-NBVMClusterType -name 'lxc' 
-    $Cluster=New-NBVMCluster -name "DTUL1ESX01" -typeID (Get-NBVMClusterTypeByName 'vmware').id
+    $Cluster=New-NBVMCluster -name "DTUL1ESX01" -type (Get-NBVMClusterTypeByName 'vmware').id
     $Cluster
  }
 
@@ -218,27 +239,31 @@ $vms = Import-Csv $PSScriptRoot\sample-data\virtual-machines.csv
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $vms| % {
         $clusterID
-        $vm = New-NBVM -name $_.name -clusterID (Get-NBVMClusterByName 'DTUL1ESX01').id
+        $vm = New-NBVM -name $_.name -cluster (Get-NBVMClusterByName 'DTUL1ESX01').id
         $vm
-        $int = New-NBVMInterface -VMID $vm.id -name 'eth0'
+        $int = New-NBVMInterface -virtual_machine $vm.id -name 'eth0'
         $ipv4= New-NBIPAddress -address $_.ipv4
         $ipv6= New-NBIPAddress -address $_.ipv6
-        Set-NBIPAddressParent -id $ipv4.id -InterFaceType virtualization.vminterface -interfaceID $int.id
-        Set-NBIPAddressParent -id $ipv6.id -InterFaceType virtualization.vminterface -interfaceID $int.id
+        Set-NBIPAddressParent -id $ipv4.id -InterFaceType virtualization.vminterface -interface $int.id
+        Set-NBIPAddressParent -id $ipv6.id -InterFaceType virtualization.vminterface -interface $int.id
     }
  }
 
  function add-ipaddresses {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
      $Devices | ForEach-Object {
-        $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id
-        $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -deviceID (get-nbdevicebyid $_.id).id
-        $ipv4Obj = New-NBIPAddress -address $_.ipv4
-        Set-NBIPAddressParent -id $ipv4Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface 
-        Set-NBIPAddress -id $ipv4Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
-        $ipv6Obj = New-NBIPAddress -address $_.ipv6
-        Set-NBIPAddressParent -id $ipv6Obj.id -interfaceID $intObj.id -InterFaceType dcim.interface 
-        Set-NBIPAddress -id $ipv6Obj.id -key vrf -value (Get-NBVRFByName -name $_.tenant).id 
+        $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id -Verbose
+        $_
+        "Trying to create interface device"
+        $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -device (get-nbdevicebyid $_.id).id -Verbose
+        $intObj
+        "Done creating interface device"
+        $ipv4Obj = New-NBIPAddress -address $_.ipv4 -Verbose
+        $ipv4Obj
+        Set-NBIPAddressParent -id $ipv4Obj.id -interface $intObj.id -InterFaceType dcim.interface  -Verbose
+        $ipv6Obj = New-NBIPAddress -address $_.ipv6 -Verbose
+        $ipv6Obj
+        Set-NBIPAddressParent -id $ipv6Obj.id -interface $intObj.id -InterFaceType dcim.interface -Verbose
      }
  }
 
@@ -267,7 +292,7 @@ function add-aggregates {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $Prefixes = $Prefixes |Where-object { 'true' -eq $_.is_aggregate }
     $Prefixes | % {
-        $obj = New-NBAggregate -prefix $_.Prefix -rirID (Get-NBRIRByName "RFC").id
+        $obj = New-NBAggregate -prefix $_.Prefix -rir (Get-NBRIRByName "RFC").id
         Set-NBAggregate -id $obj.id -key tenant -value (Get-NBTenantByName -name $_.tenant).id
     }
 }
