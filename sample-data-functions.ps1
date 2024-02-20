@@ -1,7 +1,7 @@
 $Tenants=Import-Csv -Path $PSScriptRoot\sample-data\tenants.csv
 $Regions=Import-Csv -Path $PSScriptRoot\sample-data\regions.csv
 $SiteGroups=Import-Csv -Path $PSScriptRoot\sample-data\site-groups.csv
-$Sites=Import-Csv -Path $PSScriptRoot\sample-data\Sites.csv
+$Sites=Import-Csv -Path $PSScriptRoot\sample-data\sites.csv
 $Locations=Import-Csv -Path $PSScriptRoot\sample-data\locations.csv
 $RackRoles=Import-csv -Path $PSScriptRoot\sample-data\rack-roles.csv
 $Racks=Import-csv -Path $PSScriptRoot\sample-data\racks.csv
