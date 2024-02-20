@@ -252,18 +252,18 @@ $vms = Import-Csv $PSScriptRoot\sample-data\virtual-machines.csv
  function add-ipaddresses {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
      $Devices | ForEach-Object {
-        $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id -Verbose
+        $_|Add-member -MemberType NoteProperty -Name id -Value (Get-nbdevicebyname $_.Name).id
         $_
         "Trying to create interface device"
-        $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -device (get-nbdevicebyid $_.id).id -Verbose
+        $intObj = New-NBDeviceInterface -name eth0 -type 1000base-t -device (get-nbdevicebyid $_.id).id
         $intObj
         "Done creating interface device"
         $ipv4Obj = New-NBIPAddress -address $_.ipv4 -Verbose
         $ipv4Obj
-        Set-NBIPAddressParent -id $ipv4Obj.id -interface $intObj.id -InterFaceType dcim.interface  -Verbose
+        Set-NBIPAddressParent -id $ipv4Obj.id -interface $intObj.id -InterFaceType dcim.interface
         $ipv6Obj = New-NBIPAddress -address $_.ipv6 -Verbose
         $ipv6Obj
-        Set-NBIPAddressParent -id $ipv6Obj.id -interface $intObj.id -InterFaceType dcim.interface -Verbose
+        Set-NBIPAddressParent -id $ipv6Obj.id -interface $intObj.id -InterFaceType dcim.interface
      }
  }
 
