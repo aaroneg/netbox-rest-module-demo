@@ -12,8 +12,9 @@ This project will evolve over time and is currently at a "pretty good" state. It
 
 1. Install netbox somewhere.
 2. Add a read-write API key to your account in netbox
-3. Download the netbox-rest-module and place it somewhere in your powershell module path.
+3. You can just run `install-module netbox-rest-module -scope currentuser`
 4. Download this project anywhere.
 5. If you want to initialize the connection to your netbox instance, you can run `init.ps1` and it'll ask a few questions and store your API key in a secret vault.
-6. Run `.\add-sample-data.ps1` after making any changes to the source data csvs or function code you like.
+6. Run `.\add-sample-data\add-sample-data.ps1` after making any changes to the source data csvs or function code you like.
 7. Enjoy your demo instance of netbox.
+

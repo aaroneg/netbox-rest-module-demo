@@ -1,6 +1,9 @@
 if(!(Get-Module Microsoft.PowerShell.SecretManagement -ListAvailable)) {
-    Install-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore -Force
+    Install-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore -Force -Scope CurrentUser
     Register-SecretVault -Name SecretStore -ModuleName Microsoft.PowerShell.SecretStore -DefaultVault -AllowClobber
+}
+if(!(Get-Module netbox-rest-module -ListAvailable)) {
+    Install-Module netbox-rest-module, Microsoft.PowerShell.SecretStore -Force -Scope CurrentUser
 }
 Import-Module Microsoft.PowerShell.SecretManagement, Microsoft.PowerShell.SecretStore
 # Read or create a netbox config object
@@ -24,9 +27,6 @@ catch {
     Set-Secret -Name $config.serverAddress -Secret $Secret
 }
 
-$Connection = New-NBConnection -DeviceAddress $config.serverAddress -ApiKey $Secret -Passthru
+$Connection = New-NBConnection -DeviceAddress $config.serverAddress -ApiKey $Secret -Passthru -SkipCertificateCheck
 Write-Output "Connection initiated:"
 $Connection
-
-#$result = Test-LNMSConnection
-#($result|Get-Member -MemberType NoteProperty).Name
