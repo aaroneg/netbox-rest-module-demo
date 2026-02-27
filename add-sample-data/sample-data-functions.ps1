@@ -205,10 +205,11 @@ function add-prefixes {
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $Prefixes = $Prefixes |Where-object { 'false' -eq $_.is_aggregate }
     $Prefixes| % {
+        $_
         $obj = New-NBPrefix -prefix $_.prefix
         Set-NBPrefix -id $obj.id -key vrf -value (Get-NBVRFByName $_.tenant).id
         Set-NBPrefix -id $obj.id -key tenant -value (Get-NBTenantByName $_.tenant).id
-        Set-NBPrefix -id $obj.id -key vlan -value $_.vlan
+        Set-NBPrefix -id $obj.id -key vlan -value (Get-NBVlanByVID $_.vlan).id
     }
 }
 
@@ -239,13 +240,16 @@ $vms = Import-Csv $PSScriptRoot\sample-data\virtual-machines.csv
     Write-Warning "[$($MyInvocation.MyCommand.Name)]"
     $vms| % {
         $clusterID
-        $vm = New-NBVM -name $_.name -cluster (Get-NBVMClusterByName 'DTUL1ESX01').id
+        $vm = New-NBVM -name $_.name -cluster (Get-NBVMClusterByName 'DTUL1ESX01').id -vcpus 2 -memory 4096
         $vm
         $int = New-NBVMInterface -virtual_machine $vm.id -name 'eth0'
         $ipv4= New-NBIPAddress -address $_.ipv4
         $ipv6= New-NBIPAddress -address $_.ipv6
         Set-NBIPAddressParent -id $ipv4.id -InterFaceType virtualization.vminterface -interface $int.id
         Set-NBIPAddressParent -id $ipv6.id -InterFaceType virtualization.vminterface -interface $int.id
+        Set-NBVM -key primary_ip4 -value $ipv4.id -id $vm.id
+        Set-NBVM -key primary_ip6 -value $ipv6.id -id $vm.id
+        New-NBVMVirtualDisk -virtual_machine $vm.id -name 'os' -description 'description' -size 131072
     }
  }
 
@@ -303,7 +307,7 @@ function add-wlans {
     $Wlans | % {
         $obj = New-NBWirelessLan -SSID $_.ssid
         Set-NBWirelessLan -id $obj.id -key vlan -value (Get-NBVlanByVID $_.vlan).id
-        Set-NBWirelessLan -id $obj.id -key tenant -value $_.tenant
+        Set-NBWirelessLan -id $obj.id -key tenant -value (Get-NBTenantByName $_.tenant).id
         Set-NBWirelessLan -id $obj.id -key description -value $_.description
     }
 
