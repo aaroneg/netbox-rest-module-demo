@@ -23,10 +23,12 @@ try {
     $Secret=Get-Secret -Name $Config.serverAddress -AsPlainText -ErrorAction Stop
 }
 catch {
-    $Secret=Read-Host -Prompt "API Key"
-    Set-Secret -Name $config.serverAddress -Secret $Secret
+    $SecretKey=Read-Host -Prompt "API Key v2 ID"
+    $Secret=Read-Host -Prompt "API Key v2 Token"
+    Set-Secret -Name $config.serverAddress -Secret $Secret -Metadata @{KeyID=$SecretKey}
+    $SecretInfo=Get-SecretInfo -Name $config.serverAddress
 }
 
-$Connection = New-NBConnection -DeviceAddress $config.serverAddress -ApiKey $Secret -Passthru -SkipCertificateCheck
+$Connection = New-NBConnection -DeviceAddress $config.serverAddress -ApiKeyID $SecretInfo.Metadata.KeyID -ApiKey $Secret -Passthru -SkipCertificateCheck
 Write-Output "Connection initiated:"
-$Connection
+$Connection|select SkipCertificateCheck,address,apibaseURL,ApiKeyID|fl
